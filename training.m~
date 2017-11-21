@@ -12,7 +12,6 @@ for i = 1:length(Y)
     xpos = 0;
     % read image
     imgPath = [basePath sprintf('img_%d_%d.png',theta,xpos)];
-    % imgPath = [basePath sprintf('img_%d_%d.png',xpos,theta)];
     img = imread(imgPath);
     img = double(img);
     % background subtraction
@@ -21,13 +20,13 @@ for i = 1:length(Y)
     img = img(80:180,100:250);
     % threshold
     img(img<0) = 0;
-    img(img<100) = 0;
+    img(img<25) = 0;
     % convert
     img = img/65535;
     % filter
-    % img = medfilt2(img,[13,13]);
-    % img = imgaussfilt(img,[13,13]);
-    % img = bfilter2(img,25,[25 25/2]);
+    % img = medfilt2(img,[3,3]);
+    img = imgaussfilt(img,[3,3]);
+    
     % feature extraction
     [m,n]=size(img);
     s = sum(sum(img));
