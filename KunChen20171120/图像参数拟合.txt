@@ -1,0 +1,56 @@
+clc;clear;
+imgPath = 'G:/3/';
+imgDir  = dir([imgPath '*.png']); % 遍历所有png格式文件
+B = []; C = []; D = []; E = [];
+for i = 1:length(imgDir)          % 遍历结构体一一处理图片
+    img = imread([imgPath imgDir(i).name]); %读取每张图片
+    img = double(img);
+    [m,n]=size(img);
+    s =0;X=0;Y=0;
+    for y= 1:m
+        for x=1:n
+           s = s+img(y,x);
+        end
+    end
+    for y= 1:m
+        for x=1:n
+            X=X+(x*img(y,x))/s;
+            Y=Y+(y*img(y,x))/s;
+        end
+    end
+   %avg=mean2(img);
+   avg2=s/(m*n);
+   %a=var(img(:));
+   a3=(std2(img))^2;
+   i
+   B(i)=X;
+   C(i)=Y;
+   D(i) =avg2;
+   E(i) =a3;
+
+   fid = ['G:/3/1','.txt'];
+   c = fopen(fid,'a');
+   A = [X,Y,avg2,a3];
+   fprintf(c,'%f\t',A);
+   fprintf(c,'\n');
+   %fprintf(c,'%\n',i);
+   fclose(c);
+end
+    Y1=1:1:30;
+    X0=[ones(length(Y1),1),B',C',D',E'];
+    Y0=Y1';
+    [b,bint,r,rint,stats]=regress(Y0,X0);
+    %回归系数，回归系数估计，残差，残差置信区间，
+    %stats 用于检验回归模型的统计量，有四个数值：
+    %相关系数R2、F值、与F对应的概率p，误差方差。
+    %相关系数R2越接近1，说明回归方程越显著；
+    %F > F1-α（k，n-k-1）时拒绝H0，F越大，说明回归方程越显著；
+    %与F对应的概率p 时拒绝H0，回归模型成立。p值在0.01-0.05之间，越小越好。
+    b,bint,stats
+    rcoplot(r,rint)
+
+%http://blog.csdn.net/FX677588/article/details/53126961
+%https://zhidao.baidu.com/question/455323675965794365.html
+%http://blog.csdn.net/haoji007/article/details/53732769
+%http://www.cnblogs.com/linkr/articles/2297783.html#3839361
+%http://blog.csdn.net/u013159040/article/details/51180857

@@ -1,0 +1,35 @@
+clc;clear;
+imgPath = 'G:/2/';
+imgDir  = dir([imgPath '*.png']); % 遍历所有png格式文件
+Y0=[];
+for i = 1:length(imgDir)          % 遍历结构体就可以一一处理图片了
+    img = imread([imgPath imgDir(i).name]); %读取每张图片
+    img = double(img);
+    [m,n]=size(img);
+    s =0;X=0;Y=0;
+    for y= 1:m
+        for x=1:n
+           s = s+img(y,x);
+        end
+    end
+    for y= 1:m
+        for x=1:n
+            X=X+(x*img(y,x))/s;
+            Y=Y+(y*img(y,x))/s;
+        end
+    end
+   avg=mean2(img);
+   avg2=s/(m*n);
+   %a=var(img(:));
+   a3=(std2(img))^2;
+   i
+   Y0(i)= -61.5466+ -4.4788*X+ 6.1000*Y-0.0499*avg2+0.0001;
+   Y2=--61.5466+ -4.4788*X+ 6.1000*Y-0.0499*avg2+0.0001
+    %fid = ['C:/Users/206 专属电脑/Desktop/img_theta_x_4/1','.txt'];
+end
+    fid = ['G:/2/1','.txt'];
+   c = fopen(fid,'a');
+   fprintf(c,'%f\t',Y0);
+   fprintf(c,'\n');
+   %fprintf(c,'%\n',i);
+   fclose(c);
