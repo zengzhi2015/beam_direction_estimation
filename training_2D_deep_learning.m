@@ -67,31 +67,43 @@ save workspace
 %% load data
 load workspace
 
-%% matrix plot
-%[~,AX,~,~,~] = plotmatrix([MU_X',MU_Y',SIGMA_XX',SIGMA_XY',SIGMA_YY',Y_THETA']);
-% xlabel(AX(3),'Speed');xlabel(AX(6),'Load');xlabel(AX(9),'minBSFC');
-%% regression
+%% DNN
 X = [ones(length(Y_THETA),1), MU_X',MU_Y',SIGMA_XX',SIGMA_XY',SIGMA_YY'];
+
+layers = [InputLayer([6 1])
+          fullyConnectedLayer(10)
+          reluLayer
+          fullyConnectedLayer(10)
+          reluLayer
+          fullyConnectedLayer(1)
+          regressionLayer()];
+
+
+
+
+
+
+
+
 [b_theta,bint_theta,r_theta,rint_theta,stats_theta] = regress(Y_THETA',X);
 [b_xpos,bint_xpos,r_xpos,rint_xpos,stats_xpos] = regress(Y_XPOS',X);
 
 %%
 Y_THETA_reg = X*b_theta;
 Y_XPOS_reg = X*b_xpos;
-%%
 figure(1)
-scatter3(Y_THETA,Y_XPOS,Y_THETA_reg,'.');
+scatter3(Y_THETA,Y_XPOS,Y_THETA_reg);
 xlabel('theta')
 ylabel('xpos')
 zlabel('theta_reg')
 hold on
-scatter3(Y_THETA,Y_XPOS,Y_THETA,'.');
+scatter3(Y_THETA,Y_XPOS,Y_THETA);
 hold off
 figure(2)
-scatter3(Y_THETA,Y_XPOS,Y_XPOS_reg,'.');
+scatter3(Y_THETA,Y_XPOS,Y_XPOS_reg);
 xlabel('theta')
 ylabel('xpos')
 zlabel('xpos_reg')
 hold on
-scatter3(Y_THETA,Y_XPOS,Y_XPOS,'.');
+scatter3(Y_THETA,Y_XPOS,Y_XPOS);
 hold off
