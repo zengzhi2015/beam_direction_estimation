@@ -7,7 +7,7 @@ basePath = '/home/zhi/Datasets/beam_direction/img_theta_x/';
 background = imread([basePath 'background.png']);
 background = double(background);
 
-THETA = 1:99;
+THETA = 1:6;
 XPOS = 1:99;
 MU_X = zeros(1,length(THETA)*length(XPOS)); 
 MU_Y = zeros(1,length(THETA)*length(XPOS)); 
@@ -32,7 +32,7 @@ for i = 1:length(THETA)
         % cropping
         img = img(80:180,100:250);
         % threshold
-        img(img<0) = 0;
+        %img(img<0) = 0;
         img(img<100) = 0;
         % convert
         img = img/65535;
@@ -62,23 +62,14 @@ for i = 1:length(THETA)
 end
 
 %% save data
-save MU_X
-save MU_Y
-save SIGMA_XX
-save SIGMA_XY
-save SIGMA_YY
-save Y_THETA
-save Y_XPOS
+save workspace
 
 %% load data
-load MU_X
-load MU_Y
-load SIGMA_XX
-load SIGMA_XY
-load SIGMA_YY
-load Y_THETA
-load Y_XPOS
+load workspace
 
+%% matrix plot
+%[~,AX,~,~,~] = plotmatrix([MU_X',MU_Y',SIGMA_XX',SIGMA_XY',SIGMA_YY',Y_THETA']);
+% xlabel(AX(3),'Speed');xlabel(AX(6),'Load');xlabel(AX(9),'minBSFC');
 %% regression
 X = [ones(length(Y_THETA),1), MU_X',MU_Y',SIGMA_XX',SIGMA_XY',SIGMA_YY'];
 [b_theta,bint_theta,r_theta,rint_theta,stats_theta] = regress(Y_THETA',X);

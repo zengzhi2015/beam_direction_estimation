@@ -9,10 +9,10 @@ Y = 0:99;
 A = []; B = []; C = []; D = []; E = [];
 for i = 1:length(Y)
     theta = Y(i);
-    xpos = 0;
+    xpos = 1;
     % read image
-    imgPath = [basePath sprintf('img_%d_%d.png',theta,xpos)];
-    % imgPath = [basePath sprintf('img_%d_%d.png',xpos,theta)];
+    % imgPath = [basePath sprintf('img_%d_%d.png',theta,xpos)];
+    imgPath = [basePath sprintf('img_%d_%d.png',xpos,theta)];
     img = imread(imgPath);
     img = double(img);
     % background subtraction
@@ -45,7 +45,9 @@ for i = 1:length(Y)
     E(int32(theta)+1) = real(sqrt(sigma_xy));
 end
 
-X0 = [ones(length(Y),1), A',B',C',D',E'];
+% X0 = [ones(length(Y),1), A',B',C',D',E'];
+X0 = [ones(length(Y),1), A',B',C',D',E', ...
+                         A'.^2,B'.^2,C'.^2,D'.^2,E'.^2];
 Y0 = Y';
 [b,bint,r,rint,stats] = regress(Y0,X0);
 %% 

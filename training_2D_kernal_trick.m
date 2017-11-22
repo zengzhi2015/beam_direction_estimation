@@ -7,8 +7,8 @@ basePath = '/home/zhi/Datasets/beam_direction/img_theta_x/';
 background = imread([basePath 'background.png']);
 background = double(background);
 
-THETA = 0:99;
-XPOS = 0:99;
+THETA = 1:99;
+XPOS = 1:99;
 MU_X = zeros(1,length(THETA)*length(XPOS)); 
 MU_Y = zeros(1,length(THETA)*length(XPOS)); 
 SIGMA_XX = zeros(1,length(THETA)*length(XPOS)); 
@@ -80,7 +80,8 @@ load Y_THETA
 load Y_XPOS
 
 %% regression
-X = [ones(length(Y_THETA),1), MU_X',MU_Y',SIGMA_XX',SIGMA_XY',SIGMA_YY'];
+X = [ones(length(Y_THETA),1), MU_X',MU_Y',SIGMA_XX',SIGMA_XY',SIGMA_YY', ...
+     MU_X'.^2,MU_Y'.^2,SIGMA_XX'.^2,SIGMA_XY'.^2,SIGMA_YY'.^2];
 [b_theta,bint_theta,r_theta,rint_theta,stats_theta] = regress(Y_THETA',X);
 [b_xpos,bint_xpos,r_xpos,rint_xpos,stats_xpos] = regress(Y_XPOS',X);
 
@@ -98,3 +99,8 @@ hold off
 figure(2)
 scatter3(Y_THETA,Y_XPOS,Y_XPOS_reg);
 xlabel('theta')
+ylabel('xpos')
+zlabel('xpos_reg')
+hold on
+scatter3(Y_THETA,Y_XPOS,Y_XPOS);
+hold off
