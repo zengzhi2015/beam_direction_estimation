@@ -5,6 +5,7 @@ close all
 
 basePath = '/home/zhi/Datasets/beam_direction/img_theta_x/';
 background = imread([basePath 'background.png']);
+% background = imread([basePath 'img_50_50.png']);
 background = double(background);
 
 THETA = 1:99;

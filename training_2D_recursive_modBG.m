@@ -4,7 +4,8 @@ close all
 %% Read images and extract features
 
 basePath = '/home/zhi/Datasets/beam_direction/img_theta_x/';
-background = imread([basePath 'background.png']);
+% background = imread([basePath 'background.png']);
+background = imread([basePath 'img_50_50.png']);
 background = double(background);
 
 THETA = 1:99;
@@ -28,12 +29,11 @@ for i = 1:length(THETA)
         img = imread(imgPath);
         img = double(img);
         % background subtraction
-        img = img - background;
+        img = abs(img - background);
         % cropping
         img = img(80:180,100:250);
         % threshold
-        %img(img<0) = 0;
-        img(img<100) = 0;
+        %img(img<100) = 0;
         % convert
         img = img/65535;
         % filter
@@ -141,7 +141,7 @@ for i = 1:length(B_XPOS(:,1))
     plot(XPOS,B_XPOS(i,:),'-o');
 end
 
-%% Plot
+%% Plot regression
 Y_THETA_reg = zeros(size(Y_THETA));
 Y_XPOS_reg = zeros(size(Y_XPOS));
 
@@ -161,14 +161,21 @@ for i = 1:length(THETA)
 end
 
 figure(8)
-sub
+subplot(1,3,1)
 surf(GRID_THETA,GRID_XPOS,Y_XPOS_reg);
-% hold on
-% surf(GRID_THETA,GRID_XPOS,Y_XPOS);
-% hold off
 xlabel('theta')
 ylabel('xpos')
 zlabel('XPOS_r_e_g')
+subplot(1,3,2)
+surf(GRID_THETA,GRID_XPOS,Y_XPOS);
+xlabel('theta')
+ylabel('xpos')
+zlabel('XPOS')
+subplot(1,3,3)
+surf(GRID_THETA,GRID_XPOS,Y_XPOS_reg-Y_XPOS);
+xlabel('theta')
+ylabel('xpos')
+zlabel('XPOS_r_e_g - XPOS')
 
 for j = 1:length(XPOS)
     X_xpos = [ones(length(Y_XPOS(:,j)),1), ...
@@ -182,17 +189,93 @@ for j = 1:length(XPOS)
               SIGMA_XX(:,j).^2, ...
               SIGMA_XY(:,j).^2, ...
               SIGMA_YY(:,j).^2];
-    Y_XPOS_reg(:,j) = X_xpos*B_XPOS(:,j);
+    Y_THETA_reg(:,j) = X_xpos*B_XPOS(:,j);
 end
 
 figure(9)
-surf(GRID_THETA,GRID_XPOS,Y_XPOS_reg);
+subplot(1,3,1)
+surf(GRID_THETA,GRID_XPOS,Y_THETA_reg);
 xlabel('theta')
 ylabel('xpos')
-zlabel('\theta_r_e_g')
-%%
-Y_THETA_reg = X*b_theta;
-Y_XPOS_reg = X*b_xpos;
+zlabel('theta_r_e_g')
+subplot(1,3,2)
+surf(GRID_THETA,GRID_XPOS,Y_THETA);
+xlabel('theta')
+ylabel('xpos')
+zlabel('theta')
+subplot(1,3,3)
+surf(GRID_THETA,GRID_XPOS,Y_THETA_reg-Y_THETA);
+xlabel('theta')
+ylabel('xpos')
+zlabel('theta_r_e_g - theta')
+
+
+%% recursive regression
+i = 60;
+j = 30;
+x_test = [1, ...
+          MU_X(i,j), ...
+          MU_Y(i,j), ...
+          SIGMA_XX(i,j), ...
+          SIGMA_XY(i,j), ...
+          SIGMA_YY(i,j), ...
+          MU_X(i,j).^2, ...
+          MU_Y(i,j).^2, ... 
+          SIGMA_XX(i,j).^2, ...
+          SIGMA_XY(i,j).^2, ...
+          SIGMA_YY(i,j).^2];
+
+
+theta_0 = 50;
+xpos_0 = x_test*B_THETA(:,max(1,min(99,round(theta_0))));
+
+theta_1 = x_test*B_XPOS(:,max(1,min(99,round(xpos_0))));
+xpos_1 = x_test*B_THETA(:,max(1,min(99,round(theta_1))));
+
+theta_2 = x_test*B_XPOS(:,max(1,min(99,round(xpos_1))));
+xpos_2 = x_test*B_THETA(:,max(1,min(99,round(theta_2))));
+
+theta_3 = x_test*B_XPOS(:,max(1,min(99,round(xpos_2))));
+xpos_3 = x_test*B_THETA(:,max(1,min(99,round(theta_3))));
+
+theta_4 = x_test*B_XPOS(:,max(1,min(99,round(xpos_3))));
+xpos_4 = x_test*B_THETA(:,max(1,min(99,round(theta_4))));
+
+theta_5 = x_test*B_XPOS(:,max(1,min(99,round(xpos_4))));
+xpos_5 = x_test*B_THETA(:,max(1,min(99,round(theta_5))));
+
+theta_6 = x_test*B_XPOS(:,max(1,min(99,round(xpos_5))));
+xpos_6 = x_test*B_THETA(:,max(1,min(99,round(theta_6))));
+
+theta_7 = x_test*B_XPOS(:,max(1,min(99,round(xpos_6))));
+xpos_7 = x_test*B_THETA(:,max(1,min(99,round(theta_7))));
+
+theta_8 = x_test*B_XPOS(:,max(1,min(99,round(xpos_7))));
+xpos_8 = x_test*B_THETA(:,max(1,min(99,round(theta_8))));
+
+theta_9 = x_test*B_XPOS(:,max(1,min(99,round(xpos_8))));
+xpos_9 = x_test*B_THETA(:,max(1,min(99,round(theta_9))));
+
+theta_10 = x_test*B_XPOS(:,max(1,min(99,round(xpos_9))));
+xpos_10 = x_test*B_THETA(:,max(1,min(99,round(theta_10))));
+
+theta_11 = x_test*B_XPOS(:,max(1,min(99,round(xpos_10))));
+xpos_11 = x_test*B_THETA(:,max(1,min(99,round(theta_11))));
+
+theta_12 = x_test*B_XPOS(:,max(1,min(99,round(xpos_11))));
+xpos_12 = x_test*B_THETA(:,max(1,min(99,round(theta_12))));
+
+theta_13 = x_test*B_XPOS(:,max(1,min(99,round(xpos_12))));
+xpos_13 = x_test*B_THETA(:,max(1,min(99,round(theta_13))));
+
+theta_14 = x_test*B_XPOS(:,max(1,min(99,round(xpos_13))));
+xpos_14 = x_test*B_THETA(:,max(1,min(99,round(theta_14))));
+
+theta_15 = x_test*B_XPOS(:,max(1,min(99,round(xpos_14))));
+xpos_15 = x_test*B_THETA(:,max(1,min(99,round(theta_15))));
+
+theta_16 = x_test*B_XPOS(:,max(1,min(99,round(xpos_15))));
+xpos_16 = x_test*B_THETA(:,max(1,min(99,round(theta_16))));
 %%
 figure(1)
 scatter3(Y_THETA,Y_XPOS,Y_THETA_reg,'.');
