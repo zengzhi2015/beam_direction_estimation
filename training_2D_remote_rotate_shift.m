@@ -8,8 +8,8 @@ background = imread([basePath 'background.png']);
 % background = imread([basePath 'img_50_50.png']);
 background = double(background);
 
-ALPHA = 1:49;
-YPOS = 2:48;
+ALPHA = 15:35;
+YPOS = 1:49;
 [GRID_ALPHA,GRID_YPOS] = meshgrid(ALPHA,YPOS);
 MU_X = zeros(length(YPOS),length(ALPHA)); 
 MU_Y = zeros(length(YPOS),length(ALPHA)); 
@@ -29,7 +29,7 @@ for i = 1:length(YPOS)
         % cropping
         img = img(80:180,50:250);
         % threshold
-        img(img<0) = 0;
+        img(img<100) = 0;
         % convert
         img = img/65535;
         % feature extraction
@@ -108,3 +108,11 @@ surf(GRID_ALPHA,GRID_YPOS,Y_ALPHA_reg-Y_ALPHA);
 xlabel('\alpha')
 ylabel('y')
 zlabel('\alpha_r_e_g - \alpha')
+%% Error evaluation
+figure('Name','Distribution of errors','NumberTitle','off')
+temp_diff = Y_ALPHA_reg(:,2:length(ALPHA))-Y_ALPHA_reg(:,1:length(ALPHA)-1)-1;
+surf(GRID_ALPHA(:,1:length(ALPHA)-1),GRID_YPOS(:,1:length(ALPHA)-1),temp_diff*800);
+xlabel('\alpha')
+ylabel('y')
+zlabel('error urad/800urad')
+disp(mean(mean(abs(temp_diff*800))))
