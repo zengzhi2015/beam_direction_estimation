@@ -1,5 +1,4 @@
-% Yesterday, we recorded the measurements with the device been at different
-% distances from the source.
+% Regression using x only.
 %%
 clc;
 clear;
@@ -13,7 +12,6 @@ background = double(background);
 
 ALPHA = (table(1,:)+table(2,:)/60+table(2,:)/3600)*pi/180;
 MU_X = zeros(1,length(ALPHA)); 
-MU_Y = zeros(1,length(ALPHA)); 
 Y_ALPHA = ALPHA;
 
 for j = 1:length(ALPHA)
@@ -35,11 +33,8 @@ for j = 1:length(ALPHA)
     [m,n]=size(img);
     s = sum(sum(img));
     x = linspace(0,n-1,n);
-    y = linspace(0,m-1,m);
     mu_x = sum(img*x')/s;
-    mu_y = sum(y*img)/s;
     MU_X(j) = mu_x;
-    MU_Y(j) = mu_y;
 end
 
 
@@ -56,8 +51,7 @@ xlabel('\alpha (rad)')
 ylabel('\mu_x (pixels)')
 %% regression
 X_alpha = [ones(length(Y_ALPHA),1), ...
-           MU_X', ...
-           MU_Y'];
+           MU_X'];
 % X_alpha = [ones(length(Y_ALPHA),1), ...
 %            MU_X', ...
 %            MU_Y',...
@@ -73,8 +67,7 @@ Y_ALPHA_reg = zeros(size(Y_ALPHA));
 
 for j = 1:length(ALPHA)
     mu_x = MU_X(j);
-    mu_y = MU_Y(j);
-    Y_ALPHA_reg(j) = [1,mu_x,mu_y]*b;
+    Y_ALPHA_reg(j) = [1,mu_x]*b;
 %     Y_ALPHA_reg(j) = [1,mu_x,mu_y,mu_x^2,mu_y^2,mu_x*mu_y]*b;
 end
 
