@@ -1,19 +1,24 @@
-% Regression using x only.
+% In this experiment, it is the mirror rather than the light sours that rotates.
+% regression on distances only.
 %%
 clc;
 clear;
 close all
 %% Read images and extract features
 
-basePath = '/home/zhi/Datasets/beam_direction/Experiment_20171226/100cm/';
+basePath = '/home/zhi/Datasets/beam_direction/Experiment_20180103/713mm/';
 table = xlsread([basePath 'ALPHA.xlsx'])';
 background = imread([basePath 'background.png']);
 background = double(background);
 
-ALPHA = (table(1,:)+table(2,:)/60+table(3,:)/3600)*pi/180;
+ALPHA = (table(1,:)+table(2,:)/60.0+table(3,:)/3600.0)*pi/180;
+ALPHA = ALPHA-ALPHA(1);
 MU_X = zeros(1,length(ALPHA)); 
+MU_Y = zeros(1,length(ALPHA)); 
 Y_ALPHA = ALPHA;
 
+%%
+figure('Name','Image','NumberTitle','off')
 for j = 1:length(ALPHA)
     alpha = ALPHA(j);
     % read image
@@ -23,35 +28,48 @@ for j = 1:length(ALPHA)
     % background subtraction
     img = abs(img - background);
     % cropping
-    img = img(50:150,100:220);
-    % threshold
-    img(img<2000) = 0;
+    img = img(80:200,80:220);
+    max_level = max(max(img));
+    avg_max_level = mean(mean(img(img>max_level*0.9)));
+    img = img-avg_max_level/10;
+    img(img<1) = 0;
     % convert
-    img = img/65535;
+    img = img/(avg_max_level*1.2);
+    img(img>1) = 1;
+
+    % img = imresize(img, 2.0);
     imshow(img)
+
     % feature extraction
     [m,n]=size(img);
     s = sum(sum(img));
     x = linspace(0,n-1,n);
+    y = linspace(0,m-1,m);
     mu_x = sum(img*x')/s;
+    mu_y = sum(y*img)/s;
     MU_X(j) = mu_x;
+    MU_Y(j) = mu_y;
 end
 
-
-%% save data
-% save remote
-
-%% load data
-% load remote
-
-%% plot
-figure('Name','Distribution of \mu_x','NumberTitle','off')
-scatter(ALPHA,MU_X);
-xlabel('\alpha (rad)')
-ylabel('\mu_x (pixels)')
+% plot
+figure('Name','Distribution of samples','NumberTitle','off')
+plot(MU_X,MU_Y,'-o');
+xlabel('\mu_x (pixels)')
+ylabel('\mu_y (pixels)')
+%% Calculate distances
+DIS = MU_X*0;
+DIS(1) = 0;
+for j = 2:length(ALPHA)
+    DIS(j) = sqrt((MU_X(j)-MU_X(1))^2 + (MU_Y(j)-MU_Y(1))^2);
+end
 %% regression
 X_alpha = [ones(length(Y_ALPHA),1), ...
-           MU_X'];
+           DIS'];
+% X_alpha = [ones(length(Y_ALPHA),1), ...
+%            MU_X'];
+% X_alpha = [ones(length(Y_ALPHA),1), ...
+%            MU_X', ...
+%            MU_Y'];
 % X_alpha = [ones(length(Y_ALPHA),1), ...
 %            MU_X', ...
 %            MU_Y',...
@@ -67,7 +85,14 @@ Y_ALPHA_reg = zeros(size(Y_ALPHA));
 
 for j = 1:length(ALPHA)
     mu_x = MU_X(j);
-    Y_ALPHA_reg(j) = [1,mu_x]*b;
+    mu_y = MU_Y(j);
+    mu_x0 = MU_X(1);
+    mu_y0 = MU_Y(1);
+    dis = sqrt((mu_x-mu_x0)^2+(mu_y-mu_y0)^2);
+    Y_ALPHA_reg(j) = [1,dis]*b;
+%     Y_ALPHA_reg(j) = [1,mu_x]*b;
+%     Y_ALPHA_reg(j) = [1,mu_x]*b;
+%     Y_ALPHA_reg(j) = [1,mu_x,mu_y]*b;
 %     Y_ALPHA_reg(j) = [1,mu_x,mu_y,mu_x^2,mu_y^2,mu_x*mu_y]*b;
 end
 
@@ -80,19 +105,11 @@ xlabel('\alpha (rad)')
 ylabel('\alpha_r_e_g (rad)')
 %figure('Name','Distribution of \alpha','NumberTitle','off')
 hold on
-plot(ALPHA,Y_ALPHA);
-% xlabel('\alpha')
-% ylabel('\alpha')
+plot(ALPHA,Y_ALPHA','-*');
+xlabel('\alpha')
+ylabel('\alpha')
 hold off
 figure('Name','Distribution of \alpha_r_e_g - \alpha','NumberTitle','off')
 plot(ALPHA,Y_ALPHA_reg-Y_ALPHA,'-o');
 xlabel('\alpha (rad)')
 ylabel('\alpha_r_e_g - \alpha (rad)')
-%% Error evaluation
-% figure('Name','Distribution of errors','NumberTitle','off')
-% temp_diff = Y_ALPHA_reg(2:length(ALPHA))-Y_ALPHA_reg(1:length(ALPHA)-1)-1;
-% surf(GRID_ALPHA(:,1:length(ALPHA)-1),GRID_YPOS(:,1:length(ALPHA)-1),temp_diff*800);
-% xlabel('\alpha')
-% ylabel('y')
-% zlabel('error urad/800urad')
-% disp(mean(mean(abs(temp_diff*800))))

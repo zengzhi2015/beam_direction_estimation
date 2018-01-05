@@ -10,7 +10,7 @@ table = xlsread([basePath 'ALPHA.xlsx'])';
 background = imread([basePath 'background.png']);
 background = double(background);
 
-ALPHA = (table(1,:)+table(2,:)/60+table(2,:)/3600)*pi/180;
+ALPHA = (table(1,:)+table(2,:)/60+table(3,:)/3600)*pi/180;
 MU_X = zeros(1,length(ALPHA)); 
 MU_Y = zeros(1,length(ALPHA)); 
 Y_ALPHA = ALPHA;
