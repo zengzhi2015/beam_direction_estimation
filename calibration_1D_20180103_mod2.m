@@ -28,7 +28,8 @@ for j = 1:length(ALPHA)
     % background subtraction
     img = abs(img - background);
     % cropping
-    img = img(80:200,80:220);
+%     img = img(80:200,80:220);
+    img = medfilt2(img,[3,3]);
     max_level = max(max(img));
     avg_max_level = mean(mean(img(img>max_level*0.9)));
     img = img-avg_max_level/10;
