@@ -100,8 +100,8 @@ function [ k, r ] = f_calibration_1D( basePath )
     %figure('Name','Distribution of \alpha','NumberTitle','off')
     hold on
     plot(ALPHA,Y_ALPHA','-*');
-    xlabel('\alpha')
-    ylabel('\alpha')
+%     xlabel('\alpha')
+%     ylabel('\alpha')
     hold off
     figure('Name','Distribution of \alpha_r_e_g - \alpha','NumberTitle','off')
     plot(ALPHA,Y_ALPHA_reg-Y_ALPHA,'-o');

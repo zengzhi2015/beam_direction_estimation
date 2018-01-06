@@ -1,12 +1,6 @@
-% In this experiment, it is the mirror rather than the light sours that rotates.
-% This is for the reconstructed system.
-%%
-clc;
-clear;
-close all
-%% calibration
-%% system noise estimation
-basePath = '/home/zhi/Datasets/beam_direction/Experiment_20180105/centers/';
+function f_noise_analysis( basePath, K)
+%F_NOISE_ANALYSIS Summary of this function goes here
+%   Detailed explanation goes here
     background = imread([basePath 'background.png']);
     background = double(background);
 
@@ -14,7 +8,7 @@ basePath = '/home/zhi/Datasets/beam_direction/Experiment_20180105/centers/';
     MU_Y = zeros(1,10); 
 
     %% Calculate the centers of the light spots
-    figure('Name','Image','NumberTitle','off')
+    figure('Name','Noise Image','NumberTitle','off')
     for j = 1:10
         % read image
         imgPath = [basePath sprintf('c%d.png',j)];
@@ -50,27 +44,14 @@ basePath = '/home/zhi/Datasets/beam_direction/Experiment_20180105/centers/';
     %%
     MU_X_mean = mean(MU_X);
     MU_Y_mean = mean(MU_Y);
-    DIS = sqrt((MU_X-MU_X_mean).^2 + (MU_Y-MU_Y_mean)^2);
-    
-%% 125mm
-close all
-basePath_125 = '/home/zhi/Datasets/beam_direction/Experiment_20180105/125mm/';
-[k_125,r_125] = f_calibration_1D(basePath_125);
-%% 252mm
-close all
-basePath_252 = '/home/zhi/Datasets/beam_direction/Experiment_20180105/252mm/';
-[k_252,r_252] = f_calibration_1D(basePath_252);
-%% 385mm
-close all
-basePath_385 = '/home/zhi/Datasets/beam_direction/Experiment_20180105/385mm/';
-[k_385,r_385] = f_calibration_1D(basePath_385);
-%% 497mm
-close all
-basePath_497 = '/home/zhi/Datasets/beam_direction/Experiment_20180105/497mm/';
-[k_497,r_497] = f_calibration_1D(basePath_497);
-%% regression
-close all
-K = [k_125;k_252;k_385;k_497];
-D = [125;252;385;497];
-k_K = f_K_regression( K,D );
-%%
+    DIS = sqrt((MU_X-MU_X_mean).^2 + (MU_Y-MU_Y_mean).^2);
+    figure('Name','Box plot of distribution noise','NumberTitle','off')
+    boxplot(DIS)
+    ylabel('distribution noise (pixel)')
+    %%
+    ANG_DIS = abs(DIS'*K');
+    figure('Name','Box plot of angular noise','NumberTitle','off')
+    boxplot(ANG_DIS)
+    ylabel('angular noise (rad)')
+end
+

@@ -1,22 +1,6 @@
-function [ k, r ] = f_calibration_1D( basePath )
-%F_CALIBRATION_1D Summary of this function goes here
-%   The function takes a folder as the input, and returns the ratio between
-%   the difference of rotation angle in rad respect to the displacement of the
-%   center of the light spot in pixels.
+function f_evaluation_1D( basePath, B_K, distance )
+%F_EVALUATION_1D Summary of this function goes here
 %   Detailed explanation goes here
-%   Inputs:
-%       basePath: The folder cotaining the images and records for the calibration
-%   Outputs:
-%       k: the ratio
-%       r: the regression error
-%   Note:
-%       The folder should contain images with labels: 001.png, 002.png, ...
-%       The floder should contain a background image: 'background.png'
-%       The floder should contain a record: 'ALPHA.xlsx'
-%       The record should contain a list of '[degree,minute,second]'
-% 
-% 
-
     table = xlsread([basePath 'ALPHA.xlsx'])';
     background = imread([basePath 'background.png']);
     background = double(background);
@@ -63,58 +47,34 @@ function [ k, r ] = f_calibration_1D( basePath )
     xlabel('\mu_x (pixels)')
     ylabel('\mu_y (pixels)')
     %% Calculate distances
-    mean_x = 
-    DIS = MU_X*0;
-    DIS(1) = 0;
-    for j = 2:length(ALPHA)
-        DIS(j) = sqrt((MU_X(j)-MU_X(1))^2 + (MU_Y(j)-MU_Y(1))^2);
+    MU_X_0 = mean(MU_X(1));
+    MU_Y_0 = mean(MU_Y(1));
+    DIS = zeros(1,length(ALPHA));
+    for j = 1:length(ALPHA)
+        dis_norm = sqrt((MU_X(j)-MU_X_0)^2 + (MU_Y(j)-MU_Y_0)^2);
+        temp_direction = cross([MU_X(j),MU_Y(j),0],[MU_X_0,MU_Y_0,0]);
+        DIS(j) = dis_norm*sign(temp_direction(3));
     end
-    %% regression
-    X_alpha = [ones(length(Y_ALPHA),1), ...
-               DIS'];
-    % X_alpha = [ones(length(Y_ALPHA),1), ...
-    %            MU_X'];
-    % X_alpha = [ones(length(Y_ALPHA),1), ...
-    %            MU_X', ...
-    %            MU_Y'];
-    % X_alpha = [ones(length(Y_ALPHA),1), ...
-    %            MU_X', ...
-    %            MU_Y',...
-    %            MU_X'.^2,...
-    %            MU_Y'.^2,...
-    %            MU_X'.*MU_Y'];
-    Y_alpha = Y_ALPHA';
-
-    [b,bint,r,rint,stats] = regress(Y_alpha,X_alpha);
-
     %% regression evaluation
+    k_eval = [1,distance]*B_K;
+    b_eval = [0;k_eval];
     Y_ALPHA_reg = zeros(size(Y_ALPHA));
 
     for j = 1:length(ALPHA)
         mu_x = MU_X(j);
         mu_y = MU_Y(j);
-        mu_x0 = MU_X(1);
-        mu_y0 = MU_Y(1);
-        dis = sqrt((mu_x-mu_x0)^2+(mu_y-mu_y0)^2);
-        Y_ALPHA_reg(j) = [1,dis]*b;
-    %     Y_ALPHA_reg(j) = [1,mu_x]*b;
-    %     Y_ALPHA_reg(j) = [1,mu_x]*b;
-    %     Y_ALPHA_reg(j) = [1,mu_x,mu_y]*b;
-    %     Y_ALPHA_reg(j) = [1,mu_x,mu_y,mu_x^2,mu_y^2,mu_x*mu_y]*b;
+        dis_norm = sqrt((mu_x-MU_X_0)^2+(mu_y-MU_Y_0)^2);
+        temp_direction = cross([mu_x,mu_y,0],[MU_X_0,MU_Y_0,0]);
+        dis = dis_norm*sign(temp_direction(3));
+        Y_ALPHA_reg(j) = [1,dis]*b_eval;
     end
-
-    figure('Name','Box plot of regression residuals','NumberTitle','off')
-    boxplot(abs(r))
     %% Plot regression
     figure('Name','Distribution of \alpha_r_e_g','NumberTitle','off')
     scatter(ALPHA,Y_ALPHA_reg);
     xlabel('\alpha (rad)')
     ylabel('\alpha_r_e_g (rad)')
-    %figure('Name','Distribution of \alpha','NumberTitle','off')
     hold on
     plot(ALPHA,Y_ALPHA','-*');
-    xlabel('\alpha')
-    ylabel('\alpha')
     hold off
     figure('Name','Distribution of \alpha_r_e_g - \alpha','NumberTitle','off')
     plot(ALPHA,Y_ALPHA_reg-Y_ALPHA,'-o');
